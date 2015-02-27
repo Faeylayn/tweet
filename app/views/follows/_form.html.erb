@@ -1,0 +1,35 @@
+<!-- <% if current_user.follows?(user) %>
+  <%= button_to "Unfollow", user_follow_url(user), method: :delete %>
+<% else %>
+  <%= button_to "Follow", user_follow_url(user), method: :post %>
+<% end %> -->
+
+<button class="follow-toggle" id="follow"
+        data-user-id="<%= user.id %>"
+        data-initial-follow-state="<%= current_user.follows?(user) %>">
+        </button>
+
+<script charset="utf-8">
+$.FollowToggle = function (el) {
+  this.$el = $(el);
+  this.userId = this.$el.data("user-id");
+  this.initialFollowState = this.$el.data("initial-follow-state");
+  this.FollowState = (this.initialFollowState) ? "followed" : "unfollowed";
+  this.render();
+};
+
+$.FollowToggle.prototype.render = function () {
+  var buttonText = (this.FollowState === "followed") ? "Unfollow!" : "Follow!"
+  this.$el.text(buttonText);
+};
+
+$.fn.followToggle = function () {
+return this.each(function () {
+  new $.FollowToggle(this);
+});
+};
+
+$(function () {
+$("button.follow-toggle").followToggle();
+});
+</script>
