@@ -2,9 +2,67 @@
 
 <b>Your Feed!</b>
 <ul class="tweets">
-  <% @feed_tweets.each do |tweet| %>
+  <!-- <% @feed_tweets.each do |tweet| %>
     <li><%= render "tweets/tweet", tweet: tweet %></li>
-  <% end %>
+  <% end %> -->
 </ul>
+<a class="more-tweets" href="#">More Tweets</a>
 
 <%= render "tweets/form" %>
+
+
+
+<script>
+$.InfiniteTweets = function (el) {
+  this.$el = $(el);
+  this.fetchTweets();
+};
+
+$.InfiniteTweets.prototype.fetchTweets = function () {
+  this.$el.on("click", function(event) {
+    // var ul =
+    var lastTweet = $("ul.tweets > li:last-child")
+    console.log(lastTweet);
+    event.preventDefault();
+    $.ajax({
+      type: "get",
+      url: "./",
+      dataType: "json",
+      // data: {max_created_at: lastTweet},
+      success: function(data) {
+        this.fillTweets(data)
+      }.bind(this)
+    })
+
+  }.bind(this))
+};
+
+$.InfiniteTweets.prototype.fillTweets = function (data) {
+  console.log(data);
+  for (var i = 0; i<data.length; i++ ) {
+    var tweet = data[i];
+    for (var i = 0; i < tweet.mentions.length; i++) {
+      var mentionedUsers = "";
+      mentionedUsers += "<li><a href='../users/" +
+        tweet.mentions[i].user.id +
+        "'>" + tweet.mentions[i].user.username +
+        "</a></li>";
+    }
+    $('ul.tweets').append("<li>"+ data.content +
+" -- <a href='<%= user_url(current_user) %>'><%= current_user.username %></a> -- "+
+data.created_at +
+"<ul>" + mentionedUsers + "</ul></li>")
+  }
+}
+
+$.fn.infiniteTweets = function () {
+  return this.each(function () {
+    new $.InfiniteTweets(this);
+  });
+};
+
+$(function () {
+  $("a.more-tweets").infiniteTweets();
+});
+
+</script>
