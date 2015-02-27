@@ -16,12 +16,44 @@ $.FollowToggle = function (el) {
   this.initialFollowState = this.$el.data("initial-follow-state");
   this.FollowState = (this.initialFollowState) ? "followed" : "unfollowed";
   this.render();
+  this.handleClick();
 };
 
 $.FollowToggle.prototype.render = function () {
   var buttonText = (this.FollowState === "followed") ? "Unfollow!" : "Follow!"
   this.$el.text(buttonText);
 };
+
+$.FollowToggle.prototype.handleClick = function () {
+  this.$el.on("click", function(event) {
+    var $button = $(event.currentTarget);
+    event.preventDefault();
+
+    if (this.FollowState === "followed") {
+      $.ajax({
+        type: "delete",
+        url: "<%= user_follow_url(user) %>",
+        dataType: "json",
+        success: function(data) {
+          this.FollowState = "unfollowed";
+          this.render();
+          console.log("hello")
+        }.bind(this)
+      })
+    } else {
+      $.ajax({
+        type: "post",
+        url: "<%= user_follow_url(user) %>",
+        dataType: "json",
+        success: function(data) {
+          this.FollowState = "followed";
+          this.render();
+          console.log("else!")
+        }.bind(this)
+      })
+    }
+}.bind(this))
+}
 
 $.fn.followToggle = function () {
 return this.each(function () {
