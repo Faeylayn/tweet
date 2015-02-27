@@ -2,9 +2,7 @@
 
 <b>Your Feed!</b>
 <ul class="tweets">
-  <!-- <% @feed_tweets.each do |tweet| %>
-    <li><%= render "tweets/tweet", tweet: tweet %></li>
-  <% end %> -->
+
 </ul>
 <a class="more-tweets" href="#">More Tweets</a>
 
@@ -16,19 +14,22 @@
 $.InfiniteTweets = function (el) {
   this.$el = $(el);
   this.fetchTweets();
+  this.LastTweetTime = null;
 };
 
 $.InfiniteTweets.prototype.fetchTweets = function () {
   this.$el.on("click", function(event) {
     // var ul =
-    var lastTweet = $("ul.tweets > li:last-child")
-    console.log(lastTweet);
+    // var lastTweetTime = $("ul.tweets > li:last-child");
+
     event.preventDefault();
+    console.log(  this.LastTweetTime);
+
     $.ajax({
       type: "get",
-      url: "./",
+      url: "../feed",
       dataType: "json",
-      // data: {max_created_at: lastTweet},
+      data: { max_created_at: this.LastTweetTime },
       success: function(data) {
         this.fillTweets(data)
       }.bind(this)
@@ -38,20 +39,21 @@ $.InfiniteTweets.prototype.fetchTweets = function () {
 };
 
 $.InfiniteTweets.prototype.fillTweets = function (data) {
-  console.log(data);
+  console.log(  this.LastTweetTime);
   for (var i = 0; i<data.length; i++ ) {
     var tweet = data[i];
-    for (var i = 0; i < tweet.mentions.length; i++) {
+    for (var j = 0; j < tweet.mentions.length; j++) {
       var mentionedUsers = "";
       mentionedUsers += "<li><a href='../users/" +
-        tweet.mentions[i].user.id +
-        "'>" + tweet.mentions[i].user.username +
+        tweet.mentions[j].user.id +
+        "'>" + tweet.mentions[j].user.username +
         "</a></li>";
     }
-    $('ul.tweets').append("<li>"+ data.content +
+    $('ul.tweets').append("<li>"+ data[i].content +
 " -- <a href='<%= user_url(current_user) %>'><%= current_user.username %></a> -- "+
-data.created_at +
+data[i].created_at +
 "<ul>" + mentionedUsers + "</ul></li>")
+  this.LastTweetTime = data[i].id;
   }
 }
 

@@ -4,6 +4,7 @@ class FeedsController < ApplicationController
   LIMIT = 10
 
   def show
+    # fail unless params[:max_created_at].nil?
     @feed_tweets =
       current_user.feed_tweets(LIMIT, params[:max_created_at]).includes(:user)
     respond_to do |format|

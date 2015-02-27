@@ -42,12 +42,13 @@ class User < ActiveRecord::Base
   end
 
   def feed_tweets(limit = nil, max_created_at = nil)
-    max_created_at ||= Time.now;
+    last_tweet = Tweet.find(max_created_at) unless max_created_at.blank?
+    last_time = (last_tweet) ? last_tweet.created_at : Time.now;
     @tweets = Tweet
       .joins(:user)
       .joins("LEFT OUTER JOIN follows ON users.id = follows.followee_id")
       .where("tweets.user_id = :id OR follows.follower_id = :id", id: self.id)
-      .where("tweets.created_at < ?", max_created_at)
+      .where("tweets.created_at < ?", last_time)
       .order("tweets.created_at DESC")
       .limit(limit)
       .uniq
