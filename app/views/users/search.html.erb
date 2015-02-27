@@ -60,7 +60,7 @@ $.UsersSearch.prototype.renderResults = function(data) {
     var options = {};
     options.userId = data[i].id;
     options.followState = data[i].followed;
-    this.$users.append("<li>" + data[i].username + "</li>");
+    this.$users.append("<li><a href='./"+data[i].id + "'>" + data[i].username + "</a></li>");
     this.$users.append("<button class='follow-toggle' id=" + data[i].id + "></button>");
     $("#" + data[i].id).followToggle(options);
   }
@@ -76,64 +76,5 @@ $(function () {
   $("form.users-search").UsersSearch();
 });
 
-$.FollowToggle = function (el, options) {
-  this.$el = $(el);
-  this.userId = this.$el.data("user-id") || options.userId;
-  this.initialFollowState = this.$el.data("initial-follow-state") || options.followState;
-  this.followState = (this.initialFollowState) ? "followed" : "unfollowed";
-  this.render();
-  this.handleClick();
-};
 
-$.FollowToggle.prototype.render = function () {
-  var buttonText;
-
-  if (this.followState === "followed"){
-    buttonText = "Unfollow!";
-
-  }else if (this.followState === "unfollowed"){
-    buttonText = "Follow!";
-  }
-  this.$el.prop("disabled", false);
-  this.$el.text(buttonText);
-};
-
-$.FollowToggle.prototype.handleClick = function () {
-  this.$el.on("click", function(event) {
-    var $button = $(event.currentTarget);
-    event.preventDefault();
-    this.$el.prop("disabled", true)
-    if (this.followState === "followed") {
-      this.followState = "unfollowing";
-      this.render();
-      $.ajax({
-        type: "delete",
-        url: "./" + this.userId + "/follow",
-        dataType: "json",
-        success: function(data) {
-          this.followState = "unfollowed";
-          this.render();
-        }.bind(this)
-      })
-    } else {
-      this.followState = "following";
-      this.render();
-      $.ajax({
-        type: "post",
-        url: "./" + this.userId + "/follow",
-        dataType: "json",
-        success: function(data) {
-            this.followState = "followed";
-            this.render();
-        }.bind(this)
-      })
-    }
-  }.bind(this))
-}
-
-$.fn.followToggle = function (options) {
-return this.each(function () {
-  new $.FollowToggle(this, options);
-});
-};
 </script>

@@ -1,5 +1,5 @@
 <h2>New Tweet!</h2>
-<form action="/tweets" method="POST">
+<form class="tweet-compose" action="/tweets" method="POST">
   <input
       type="hidden"
       name="authenticity_token"
@@ -11,16 +11,99 @@
   </label>
   <br>
 
+
+
+
   <label>
     Mention
-    <select name="tweet[mentioned_user_ids][]">
-      <option></option>
-      <% User.all.each do |user| %>
-        <option value="<%= user.id %>"><%= user.username %></option>
-      <% end %>
-    </select>
+    <a class="add-user" href="#">Add mentioned user</a>
+    <section class="mention-user">
+    <script type="text/template">
+
+      <section class="new-mention-user">
+        <select name="tweet[mentioned_user_ids][]">
+          <option></option>
+          <% User.all.each do |user| %>
+            <option value="<%= user.id %>"><%= user.username %></option>
+          <% end %>
+        </select>
+        <a class="remove-user" href="#">Remove mentioned user</a>
+      </section>
+    </script>
+  </section>
   </label>
+
   <br>
 
   <input type="Submit" value="Post Tweet!">
 </form>
+
+<script>
+
+$.TweetCompose = function (el) {
+  this.$el = $(el);
+  this.submit();
+  this.addMentionedUser();
+  this.removeMentionedUser();
+};
+
+$.TweetCompose.prototype.submit = function () {
+  this.$el.on("submit", function (event){
+    event.preventDefault();
+    var serial = this.$el.serialize();
+    this.$el.find("input").prop("disabled", true);
+    $.ajax({
+      type: "post",
+      url: "/tweets",
+      dataType: "json",
+      data: serial,
+      success: this.handleSuccess.bind(this)
+    })
+  }.bind(this))
+};
+
+$.TweetCompose.prototype.handleSuccess = function (data) {
+  var mentionedUsers = "";
+  for (var i = 0; i < data.mentions.length; i++) {
+    mentionedUsers += "<li><a href='../users/" +
+                  data.mentions[i].user.id +
+                  "'>" + data.mentions[i].user.username +
+                  "</a></li>";
+  }
+  $('ul.tweets').prepend("<li>"+ data.content +
+  " -- <a href='<%= user_url(current_user) %>'><%= current_user.username %></a> -- "+
+  data.created_at +
+  "<ul>" + mentionedUsers + "</ul></li>");
+  this.$el.find(":input").val("");
+  this.$el.find(".new-mention-user").remove();
+  this.$el.find("input").prop("disabled", false);
+}
+
+$.TweetCompose.prototype.addMentionedUser = function () {
+  this.$el.on("click", "a.add-user", function (event) {
+    event.preventDefault();
+    var script = this.$el.find("script").html();
+    $(".mention-user").append(script);
+  }.bind(this))
+}
+
+$.TweetCompose.prototype.removeMentionedUser = function() {
+  this.$el.on("click", "a.remove-user", function (event) {
+    event.preventDefault();
+    var $removeLink = $(event.currentTarget);
+    $removeLink.parent().remove();
+  })
+
+}
+
+$.fn.tweetCompose = function () {
+  return this.each(function () {
+    new $.TweetCompose(this);
+  });
+};
+
+$(function () {
+  $("form.tweet-compose").tweetCompose();
+});
+
+</script>

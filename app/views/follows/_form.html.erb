@@ -10,68 +10,8 @@
         </button>
 
 <script charset="utf-8">
-$.FollowToggle = function (el, options) {
-  this.$el = $(el);
-  this.userId = this.$el.data("user-id") || options.userId;
-  this.initialFollowState = this.$el.data("initial-follow-state") || options.followState;
-  this.followState = (this.initialFollowState) ? "followed" : "unfollowed";
-  this.render();
-  this.handleClick();
-};
-
-$.FollowToggle.prototype.render = function () {
-  var buttonText;
-
-  if (this.followState === "followed"){
-    buttonText = "Unfollow!";
-
-  }else if (this.followState === "unfollowed"){
-    buttonText = "Follow!";
-  }
-  this.$el.prop("disabled", false);
-  this.$el.text(buttonText);
-};
-
-$.FollowToggle.prototype.handleClick = function () {
-  this.$el.on("click", function(event) {
-    var $button = $(event.currentTarget);
-    event.preventDefault();
-    this.$el.prop("disabled", true)
-    if (this.followState === "followed") {
-      this.followState = "unfollowing";
-      this.render();
-      $.ajax({
-        type: "delete",
-        url: "<%= user_follow_url(user) %>",
-        dataType: "json",
-        success: function(data) {
-          this.followState = "unfollowed";
-          this.render();
-        }.bind(this)
-      })
-    } else {
-      this.followState = "following";
-      this.render();
-      $.ajax({
-        type: "post",
-        url: "<%= user_follow_url(user) %>",
-        dataType: "json",
-        success: function(data) {
-            this.followState = "followed";
-            this.render();
-        }.bind(this)
-      })
-    }
-  }.bind(this))
-}
-
-$.fn.followToggle = function (options) {
-return this.each(function () {
-  new $.FollowToggle(this, options);
-});
-};
 
 $(function () {
-$("button.follow-toggle").followToggle();
+$("button.follow-toggle").followToggle({});
 });
 </script>
